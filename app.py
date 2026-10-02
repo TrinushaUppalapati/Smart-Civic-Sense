@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from ultralytics import YOLO
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
