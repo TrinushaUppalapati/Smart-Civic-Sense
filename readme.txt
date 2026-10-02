@@ -1,117 +1,96 @@
-SMART CIVIC SENSE
-==================
+# 🌱 CivicSense
 
-HACKATHON PROTOTYPE
+## AI-Powered Smart Civic Complaint Management System
 
+CivicSense is an AI-powered civic complaint management system designed to help citizens report and track common civic issues such as garbage, road damage, streetlight problems, water leakage, and drainage issues.
 
-PROJECT STRUCTURE
------------------
+The system allows users to submit complaints with images and locations. AI-based image analysis helps identify the type of civic issue, while an interactive map helps visualize complaint locations.
 
-Smart Civic Sense/
-
-    app.py
-
-    civic_model.pt
-
-    requirements.txt
-
-    templates/
-
-        index.html
-
-        add_complaint.html
-
-        complaints.html
-
-        map.html
-
-    static/
-
-        style.css
-
-    uploads/
-
-    .venv/
-
-
-INSTALLATION
-------------
-
-Open terminal inside:
-
-C:\Smart Civic Sense
-
-
-Activate virtual environment:
-
-.venv\Scripts\activate
-
-
-Install libraries:
-
-pip install -r requirements.txt
-
-
-RUN
 ---
 
-python app.py
+##  Features
 
+- 📋 Submit civic complaints
+- 📸 Upload images of civic issues
+- 🤖 AI-based image analysis
+- 📍 Location selection and detection
+- 🗺️ Interactive map using Leaflet.js
+- 📌 Complaint location markers
+- 📊 Complaint analytics dashboard
+- 🍩 Complaint status visualization
+- ⚡ Priority-based complaint management
+- 📄 Complaint reports
+- 👤 Admin dashboard
+- ⚙️ Application settings
+- 🔄 Complaint status tracking
 
-Open browser:
+---
 
-http://127.0.0.1:5000
+## 🏙️ Civic Issues Supported
 
+The system can be used to report issues such as:
 
-FEATURES
---------
+- 🗑️ Garbage
+- 🛣️ Road Damage
+- 💡 Streetlight Problems
+- 💧 Water Leakage
+- 🚰 Drainage Issues
+- ⚠️ Other Civic Issues
 
-1. CivicSense Dashboard
+---
 
-2. Add Civic Complaint
+## 🛠️ Technologies Used
 
-3. Image Upload
+### Frontend
+- HTML
+- CSS
+- JavaScript
+- Leaflet.js
+- Chart.js
 
-4. AI Image Analysis
+### Backend
+- Python
+- Flask
 
-5. AI Confidence
+### AI / Machine Learning
+- YOLO
+- Ultralytics
 
-6. Severity Detection
+### Maps
+- Leaflet.js
+- OpenStreetMap
 
-7. Priority Score
+### Other Tools
+- Git
+- GitHub
+- VS Code
 
-8. Priority Classification
+---
 
-9. Manual Location Search
+## 📂 Project Structure
 
-10. Browser Location
-
-11. Leaflet Map
-
-12. Complaint Submission
-
-13. Complaint ID Generation
-
-14. Complaint List
-
-15. Complaint Status Update
-
-16. Complaint Map
-
-
-IMPORTANT
----------
-
-Keep civic_model.pt in the project root.
-
-The model file is required for AI image analysis.
-
-
-NOTE
-----
-
-This hackathon prototype stores complaints
-temporarily in memory.
-
-Restarting Flask will remove newly
-submitted complaints.
+```text
+CivicSense/
+│
+├── app.py
+├── civic_model.pt
+├── download_model.py
+├── requirements.txt
+├── readme.txt
+│
+├── static/
+│   └── style.css
+│
+├── templates/
+│   ├── index.html
+│   ├── add_complaint.html
+│   ├── complaints.html
+│   ├── map.html
+│   ├── analytics.html
+│   ├── reports.html
+│   ├── settings.html
+│   └── admin.html
+│
+├── uploads/
+│
+└── .venv/
