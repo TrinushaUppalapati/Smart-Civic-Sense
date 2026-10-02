@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Complaints</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<aside class="sidebar">
+
+
+<div class="logo">
+🌱 CivicSense
+</div>
+
+
+<a class="menu"
+href="/">
+🏠 Dashboard
+</a>
+
+
+<a class="menu active"
+href="/complaints">
+📋 Complaints
+</a>
+
+
+<a class="menu"
+href="/add-complaint">
+➕ Add
+</a>
+
+
+<a class="menu"
+href="/map">
+🗺️ Map
+</a>
+
+
+<a class="menu"
+href="#">
+📊 Analytics
+</a>
+
+
+<a class="menu"
+href="#">
+📄 Reports
+</a>
+
+
+<a class="menu"
+href="#">
+⚙️ Settings
+</a>
+
+
+</aside>
+
+
+
+<main class="main">
+
+
+<header class="topbar">
+
+<span>
+👤 Admin
+</span>
+
+</header>
+
+
+
+<section class="content">
+
+
+<h1>
+📋 Complaints
+</h1>
+
+
+
+<div class="table-panel">
+
+
+<table>
+
+
+<tr>
+
+<th>
+ID
+</th>
+
+<th>
+Issue
+</th>
+
+<th>
+Location
+</th>
+
+<th>
+AI Confidence
+</th>
+
+<th>
+Priority
+</th>
+
+<th>
+Status
+</th>
+
+<th>
+Update
+</th>
+
+</tr>
+
+
+
+{% for c in complaints %}
+
+
+<tr>
+
+
+<td>
+{{ c.id }}
+</td>
+
+
+<td>
+{{ c.title }}
+</td>
+
+
+<td>
+{{ c.location }}
+</td>
+
+
+<td>
+{{ c.ai_confidence }}%
+</td>
+
+
+<td>
+{{ c.priority }}
+</td>
+
+
+<td id="s-{{ c.id }}">
+{{ c.status }}
+</td>
+
+
+<td>
+
+
+<select
+onchange="updateStatus(
+'{{ c.id }}',
+this.value
+)">
+
+
+<option>
+Submitted
+</option>
+
+<option>
+Under Review
+</option>
+
+<option>
+Assigned
+</option>
+
+<option>
+In Progress
+</option>
+
+<option>
+Resolved
+</option>
+
+
+</select>
+
+
+</td>
+
+
+</tr>
+
+
+{% endfor %}
+
+
+</table>
+
+
+</div>
+
+
+</section>
+
+
+</main>
+
+
+
+<script>
+
+
+async function updateStatus(
+id,
+status
+) {
+
+
+const response =
+await fetch(
+
+"/update-status/"
++
+id,
+
+{
+
+method:
+"POST",
+
+headers:
+{
+
+"Content-Type":
+"application/json"
+
+},
+
+body:
+JSON.stringify({
+
+status:
+status
+
+})
+
+}
+
+);
+
+
+const data =
+await response.json();
+
+
+if (data.success) {
+
+
+document
+.getElementById(
+"s-" + id
+)
+.textContent =
+status;
+
+
+}
+
+else {
+
+alert(
+data.message
+);
+
+}
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

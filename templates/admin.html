@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Admin - CivicSense</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+<div class="logo">🌱 CivicSense</div>
+
+<a href="/" class="menu">🏠 Dashboard</a>
+
+<a href="/complaints" class="menu">📋 Complaints</a>
+
+<a href="/add-complaint" class="menu">➕ Add</a>
+
+<a href="/map" class="menu">🗺️ Map</a>
+
+<a href="/analytics" class="menu">📊 Analytics</a>
+
+<a href="/reports" class="menu">📄 Reports</a>
+
+<a href="/settings" class="menu">⚙️ Settings</a>
+
+</aside>
+
+
+<main class="main">
+
+<header class="topbar">
+
+<span>🔔</span>
+
+<a href="/admin"
+style="text-decoration:none;color:#333;">
+👤 Admin
+</a>
+
+</header>
+
+
+<section class="content">
+
+<h1>👤 Admin Profile</h1>
+
+
+<div class="panel">
+
+<h2>Administrator</h2>
+
+<p>
+<strong>Role:</strong>
+System Administrator
+</p>
+
+<p>
+<strong>Access:</strong>
+Full Dashboard Access
+</p>
+
+<p>
+<strong>Total Complaints:</strong>
+{{ complaints|length }}
+</p>
+
+<hr>
+
+<h3>Admin Actions</h3>
+
+<a href="/complaints">
+<button style="padding:10px 20px;">
+Manage Complaints
+</button>
+</a>
+
+<a href="/reports">
+<button style="padding:10px 20px;">
+View Reports
+</button>
+</a>
+
+</div>
+
+</section>
+
+</main>
+
+</body>
+</html>

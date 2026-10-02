@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicSense Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        🌱 CivicSense
+    </div>
+
+    <a href="/" class="menu active">
+        🏠 Dashboard
+    </a>
+
+    <a href="/complaints" class="menu">
+        📋 Complaints
+    </a>
+
+    <a href="/add-complaint" class="menu">
+        ➕ Add
+    </a>
+
+    <a href="/map" class="menu">
+        🗺️ Map
+    </a>
+
+    <a href="/analytics" class="menu">
+        📊 Analytics
+    </a>
+
+    <a href="/reports" class="menu">
+        📄 Reports
+    </a>
+
+    <a href="/settings" class="menu">
+        ⚙️ Settings
+    </a>
+
+</aside>
+
+
+<main class="main">
+
+<header class="topbar">
+
+    <input
+        type="text"
+        class="search"
+        placeholder="Search">
+
+    <span>🔔</span>
+
+    <a href="/admin"
+       style="text-decoration:none;color:#333;">
+        👤 Admin
+    </a>
+
+</header>
+
+
+<section class="content">
+
+<h1>Dashboard</h1>
+
+
+<div class="stats">
+
+    <div class="card">
+        <small>TOTAL COMPLAINTS</small>
+        <strong>{{ total }}</strong>
+    </div>
+
+    <div class="card">
+        <small>NEW COMPLAINTS</small>
+        <strong>{{ new_count }}</strong>
+    </div>
+
+    <div class="card">
+        <small>HIGH PRIORITY</small>
+        <strong>{{ high }}</strong>
+    </div>
+
+    <div class="card">
+        <small>RESOLVED</small>
+        <strong>{{ resolved }}</strong>
+    </div>
+
+    <div class="card">
+        <small>CRITICAL ISSUES</small>
+        <strong>{{ critical }}</strong>
+    </div>
+
+</div>
+
+
+<div class="grid3">
+
+<div class="panel">
+
+<h3>📊 Complaint Analytics</h3>
+
+<canvas id="barChart"></canvas>
+
+</div>
+
+
+<div class="panel">
+
+<h3>🍩 Complaint Status</h3>
+
+<canvas id="donutChart"></canvas>
+
+</div>
+
+
+<div class="panel">
+
+<h3>📋 Recent Complaints</h3>
+
+<div class="recent">
+
+{% for c in complaints[:7] %}
+
+<div class="complaint">
+
+<b>{{ c.title }}</b>
+
+<br>
+
+<small>
+  {{ c.location }}
+</small>
+
+<br>
+
+<span class="badge {{ c.priority|lower }}">
+{{ c.priority }}
+</span>
+
+<span class="badge status">
+{{ c.status }}
+</span>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="grid2 lower">
+
+<div class="panel">
+
+<h3>🗺️ MAP</h3>
+
+<div id="map"></div>
+
+</div>
+
+
+<div class="panel">
+
+<h3>⚡ Priority Areas</h3>
+
+{% for c in complaints[:7] %}
+
+<div class="priority-item">
+
+<span>
+  {{ c.location }}
+</span>
+
+<b>
+{{ c.priority_score }}/100
+</b>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<script>
+
+const barCanvas =
+document.getElementById("barChart");
+
+new Chart(barCanvas, {
+
+type: "bar",
+
+data: {
+
+labels: [
+"Garbage",
+"Road",
+"Streetlight",
+"Water",
+"Drainage"
+],
+
+datasets: [{
+
+label: "Complaints",
+
+data: [
+35,
+28,
+20,
+18,
+12
+]
+
+}]
+
+},
+
+options: {
+
+responsive: true,
+
+plugins: {
+
+legend: {
+display: false
+}
+
+}
+
+}
+
+});
+
+
+const donutCanvas =
+document.getElementById("donutChart");
+
+new Chart(donutCanvas, {
+
+type: "doughnut",
+
+data: {
+
+labels: [
+"Submitted",
+"Under Review",
+"In Progress",
+"Resolved"
+],
+
+datasets: [{
+
+data: [
+
+{{ complaints
+|selectattr(
+"status",
+"equalto",
+"Submitted"
+)
+|list
+|length }},
+
+{{ complaints
+|selectattr(
+"status",
+"equalto",
+"Under Review"
+)
+|list
+|length }},
+
+{{ complaints
+|selectattr(
+"status",
+"equalto",
+"In Progress"
+)
+|list
+|length }},
+
+{{ resolved }}
+
+]
+
+}]
+
+},
+
+options: {
+
+responsive: true
+
+}
+
+});
+
+
+const map =
+L.map("map").setView(
+[16.5062, 80.6480],
+13
+);
+
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+attribution:
+"© OpenStreetMap contributors"
+}
+).addTo(map);
+
+
+{% for c in complaints %}
+
+{% if c.latitude is not none and c.longitude is not none %}
+
+L.marker([
+{{ c.latitude }},
+{{ c.longitude }}
+])
+.addTo(map)
+.bindPopup(
+"<b>{{ c.title }}</b><br>" +
+"{{ c.location }}<br>" +
+"Priority: {{ c.priority }}"
+);
+
+{% endif %}
+
+{% endfor %}
+
+</script>
+
+</body>
+
+</html>

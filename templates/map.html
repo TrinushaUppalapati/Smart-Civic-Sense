@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicSense Map</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        🌱 CivicSense
+    </div>
+
+    <a href="/" class="menu">
+        🏠 Dashboard
+    </a>
+
+    <a href="/complaints" class="menu">
+        📋 Complaints
+    </a>
+
+    <a href="/add-complaint" class="menu">
+        ➕ Add
+    </a>
+
+    <a href="/map" class="menu active">
+        🗺️ Map
+    </a>
+
+    <a href="/analytics" class="menu">
+        📊 Analytics
+    </a>
+
+    <a href="/reports" class="menu">
+        📄 Reports
+    </a>
+
+    <a href="/settings" class="menu">
+        ⚙️ Settings
+    </a>
+
+</aside>
+
+
+<main class="main">
+
+    <header class="topbar">
+
+        <input
+            class="search"
+            type="text"
+            placeholder="Search">
+
+        <span>🔔</span>
+
+        <a href="/admin"
+           style="text-decoration:none;color:#333;">
+            👤 Admin
+        </a>
+
+    </header>
+
+
+    <section class="content">
+
+        <h1>🗺️ Civic Issue Map</h1>
+
+        <div class="panel">
+
+            <h3>
+                All Civic Complaints
+            </h3>
+
+            <div id="bigMap"></div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const map = L.map("bigMap").setView(
+    [16.5062, 80.6480],
+    13
+);
+
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution:
+            "© OpenStreetMap contributors"
+    }
+).addTo(map);
+
+
+// Complaints from Flask
+
+const complaints =
+    {{ complaints | tojson }};
+
+
+// Add markers
+
+complaints.forEach(function(c) {
+
+    if (
+        c.latitude !== null &&
+        c.longitude !== null &&
+        c.latitude !== "" &&
+        c.longitude !== ""
+    ) {
+
+        const marker = L.marker([
+            Number(c.latitude),
+            Number(c.longitude)
+        ]).addTo(map);
+
+
+        marker.bindPopup(
+
+            "<b>" + c.title + "</b>" +
+            "<br> " + c.location +
+            "<br>⚠️ Priority: " + c.priority +
+            "<br>📋 Status: " + c.status +
+            "<br>  AI Confidence: " +
+            c.ai_confidence + "%"
+
+        );
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

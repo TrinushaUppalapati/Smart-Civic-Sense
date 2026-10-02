@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Reports - CivicSense</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+<div class="logo">🌱 CivicSense</div>
+
+<a href="/" class="menu">🏠 Dashboard</a>
+
+<a href="/complaints" class="menu">📋 Complaints</a>
+
+<a href="/add-complaint" class="menu">➕ Add</a>
+
+<a href="/map" class="menu">🗺️ Map</a>
+
+<a href="/analytics" class="menu">📊 Analytics</a>
+
+<a href="/reports" class="menu active">📄 Reports</a>
+
+<a href="/settings" class="menu">⚙️ Settings</a>
+
+</aside>
+
+
+<main class="main">
+
+<header class="topbar">
+
+<span>🔔</span>
+
+<a href="/admin"
+style="text-decoration:none;color:#333;">
+👤 Admin
+</a>
+
+</header>
+
+
+<section class="content">
+
+<h1>📄 Civic Reports</h1>
+
+<div class="panel">
+
+<h3>Complaint Report</h3>
+
+<p>
+Total complaints:
+<b>{{ complaints|length }}</b>
+</p>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Issue</th>
+<th>Location</th>
+<th>Priority</th>
+<th>Status</th>
+</tr>
+
+{% for c in complaints %}
+
+<tr>
+
+<td>{{ c.id }}</td>
+
+<td>{{ c.title }}</td>
+
+<td>{{ c.location }}</td>
+
+<td>{{ c.priority }}</td>
+
+<td>{{ c.status }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</section>
+
+</main>
+
+</body>
+</html>

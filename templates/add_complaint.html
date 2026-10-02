@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Add Civic Complaint</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<aside class="sidebar">
+
+
+<div class="logo">
+🌱 CivicSense
+</div>
+
+
+<a class="menu"
+href="/">
+🏠 Dashboard
+</a>
+
+
+<a class="menu"
+href="/complaints">
+📋 Complaints
+</a>
+
+
+<a class="menu active"
+href="/add-complaint">
+➕ Add
+</a>
+
+
+<a class="menu"
+href="/map">
+🗺️ Map
+</a>
+
+
+<a class="menu"
+href="#">
+📊 Analytics
+</a>
+
+
+<a class="menu"
+href="#">
+📄 Reports
+</a>
+
+
+<a class="menu"
+href="#">
+⚙️ Settings
+</a>
+
+
+</aside>
+
+
+
+<main class="main">
+
+
+<header class="topbar">
+
+<span>
+👤 Admin
+</span>
+
+</header>
+
+
+
+<section class="content">
+
+
+<h1>
+➕ Add Civic Complaint
+</h1>
+
+
+
+<div class="form-panel">
+
+
+<label>
+Upload Civic Issue Image
+</label>
+
+
+<input
+id="image"
+type="file"
+accept="image/*">
+
+
+
+<img
+id="preview"
+class="preview"
+style="display:none">
+
+
+
+<button
+id="analyze">
+
+  Analyze Image
+
+</button>
+
+
+
+<div
+id="aiResult"
+class="result">
+</div>
+
+
+
+<label>
+Category
+</label>
+
+
+<select id="category">
+
+<option>
+Garbage
+</option>
+
+<option>
+Road Damage
+</option>
+
+<option>
+Pothole
+</option>
+
+<option>
+Streetlight
+</option>
+
+<option>
+Water Leakage
+</option>
+
+<option>
+Drainage
+</option>
+
+<option>
+Other
+</option>
+
+</select>
+
+
+
+<label>
+Description
+</label>
+
+
+<textarea
+id="description"
+rows="4"
+placeholder="Describe the civic issue">
+</textarea>
+
+
+
+<label>
+Location
+</label>
+
+
+
+<div class="location-row">
+
+
+<input
+id="location"
+placeholder="Type exact location">
+
+
+
+<button
+type="button"
+id="find">
+
+🔎 Find on Map
+
+</button>
+
+
+
+<button
+type="button"
+id="gps">
+
+  Use My Location
+
+</button>
+
+
+</div>
+
+
+
+<div id="map">
+</div>
+
+
+
+<button
+class="submit-btn"
+id="submit">
+
+  Submit Civic Complaint
+
+</button>
+
+
+
+<div id="message">
+</div>
+
+
+</div>
+
+
+</section>
+
+</main>
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script>
+
+
+let aiAnalysis = {};
+
+let lat = null;
+
+let lng = null;
+
+
+
+const map =
+L.map("map")
+.setView(
+[16.5062, 80.6480],
+12
+);
+
+
+
+L.tileLayer(
+
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+attribution:
+"© OpenStreetMap contributors"
+
+}
+
+).addTo(map);
+
+
+
+let marker = null;
+
+
+
+function setPoint(
+latitude,
+longitude,
+text
+) {
+
+
+lat = latitude;
+
+lng = longitude;
+
+
+if (marker) {
+
+map.removeLayer(marker);
+
+}
+
+
+marker =
+L.marker(
+[
+latitude,
+longitude
+]
+)
+
+.addTo(map)
+
+.bindPopup(
+text ||
+"Selected location"
+)
+
+.openPopup();
+
+
+map.setView(
+[
+latitude,
+longitude
+],
+16
+);
+
+}
+
+
+
+document
+.getElementById("image")
+.addEventListener(
+"change",
+function(event) {
+
+
+const file =
+event.target.files[0];
+
+
+if (!file) return;
+
+
+const preview =
+document.getElementById(
+"preview"
+);
+
+
+preview.src =
+URL.createObjectURL(
+file
+);
+
+
+preview.style.display =
+"block";
+
+
+}
+);
+
+
+
+document
+.getElementById("analyze")
+.onclick =
+async function() {
+
+
+const file =
+document
+.getElementById("image")
+.files[0];
+
+
+if (!file) {
+
+alert(
+"Please select an image."
+);
+
+return;
+
+}
+
+
+const formData =
+new FormData();
+
+
+formData.append(
+"image",
+file
+);
+
+
+const result =
+document.getElementById(
+"aiResult"
+);
+
+
+result.textContent =
+" Analyzing image...";
+
+
+try {
+
+
+const response =
+await fetch(
+"/analyze-image",
+{
+
+method:
+"POST",
+
+body:
+formData
+
+}
+);
+
+
+const data =
+await response.json();
+
+
+if (!data.success) {
+
+result.textContent =
+data.message;
+
+return;
+
+}
+
+
+if (!data.detected) {
+
+result.textContent =
+data.message;
+
+return;
+
+}
+
+
+aiAnalysis = {
+
+issue:
+data.issue,
+
+confidence:
+data.confidence,
+
+severity:
+data.severity,
+
+priority_score:
+data.priority_score
+
+};
+
+
+const category =
+document.getElementById(
+"category"
+);
+
+
+let found = false;
+
+
+for (
+const option of category.options
+) {
+
+
+if (
+option.value ===
+data.issue
+) {
+
+category.value =
+data.issue;
+
+found = true;
+
+}
+
+}
+
+
+if (!found) {
+
+category.value =
+"Other";
+
+}
+
+
+
+result.innerHTML =
+
+"<b>AI Detection:</b> "
++
+data.issue
++
+"<br>Confidence: "
++
+data.confidence
++
+"%"
++
+"<br>Severity: "
++
+data.severity
++
+"<br>Priority Score: "
++
+data.priority_score
++
+"/100";
+
+
+}
+
+catch(error) {
+
+result.textContent =
+"AI request failed.";
+
+}
+
+};
+
+
+
+document
+.getElementById("find")
+.onclick =
+async function() {
+
+
+const query =
+document
+.getElementById(
+"location"
+)
+.value
+.trim();
+
+
+if (!query) {
+
+alert(
+"Type a location first."
+);
+
+return;
+
+}
+
+
+try {
+
+
+const response =
+await fetch(
+
+"https://nominatim.openstreetmap.org/search?format=json&limit=1&q="
++
+encodeURIComponent(query)
+
+);
+
+
+const data =
+await response.json();
+
+
+if (!data.length) {
+
+alert(
+"Location not found."
+);
+
+return;
+
+}
+
+
+setPoint(
+
+parseFloat(
+data[0].lat
+),
+
+parseFloat(
+data[0].lon
+),
+
+data[0].display_name
+
+);
+
+
+}
+
+catch(error) {
+
+alert(
+"Map search failed."
+);
+
+}
+
+};
+
+
+
+document
+.getElementById("gps")
+.onclick =
+function() {
+
+
+if (
+!navigator.geolocation
+) {
+
+alert(
+"Geolocation is not available."
+);
+
+return;
+
+}
+
+
+navigator.geolocation.getCurrentPosition(
+
+function(position) {
+
+
+setPoint(
+
+position.coords.latitude,
+
+position.coords.longitude,
+
+"Your selected location"
+
+);
+
+
+document
+.getElementById(
+"location"
+)
+.value =
+"Current selected location";
+
+
+},
+
+function() {
+
+alert(
+"Location permission denied. Type the location manually."
+);
+
+}
+
+);
+
+};
+
+
+
+document
+.getElementById("submit")
+.onclick =
+async function() {
+
+
+const location =
+document
+.getElementById(
+"location"
+)
+.value
+.trim();
+
+
+const description =
+document
+.getElementById(
+"description"
+)
+.value
+.trim();
+
+
+if (!location) {
+
+alert(
+"Please enter or select a location."
+);
+
+return;
+
+}
+
+
+const payload = {
+
+category:
+document
+.getElementById(
+"category"
+)
+.value,
+
+description:
+description,
+
+location:
+location,
+
+latitude:
+lat,
+
+longitude:
+lng,
+
+ai_analysis:
+aiAnalysis
+
+};
+
+
+try {
+
+
+const response =
+await fetch(
+
+"/submit-complaint",
+
+{
+
+method:
+"POST",
+
+headers:
+{
+
+"Content-Type":
+"application/json"
+
+},
+
+body:
+JSON.stringify(
+payload
+)
+
+}
+
+);
+
+
+const data =
+await response.json();
+
+
+if (!data.success) {
+
+alert(
+data.message
+);
+
+return;
+
+}
+
+
+document
+.getElementById(
+"message"
+)
+.innerHTML =
+
+`<div class="success">
+
+✅ Complaint submitted successfully!
+
+<br>
+
+Complaint ID:
+
+<b>
+${data.complaint.id}
+</b>
+
+</div>`;
+
+
+setTimeout(
+
+function() {
+
+window.location.href =
+"/";
+
+},
+
+1500
+
+);
+
+
+}
+
+catch(error) {
+
+alert(
+"Submission failed."
+);
+
+}
+
+};
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings - CivicSense</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🌱 CivicSense
+        </div>
+
+
+        <a href="/" class="menu">
+            🏠 Dashboard
+        </a>
+
+
+        <a href="/complaints" class="menu">
+            📋 Complaints
+        </a>
+
+
+        <a href="/add-complaint" class="menu">
+            ➕ Add
+        </a>
+
+
+        <a href="/map" class="menu">
+            🗺️ Map
+        </a>
+
+
+        <a href="/analytics" class="menu">
+            📊 Analytics
+        </a>
+
+
+        <a href="/reports" class="menu">
+            📄 Reports
+        </a>
+
+
+        <a href="/settings" class="menu active">
+            ⚙️ Settings
+        </a>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <span>
+                ⚙️ Settings
+            </span>
+
+
+            <a href="/admin"
+               id="settingsAdminName"
+               style="text-decoration:none;color:#333;">
+
+                👤 Admin
+
+            </a>
+
+        </header>
+
+
+
+        <!-- CONTENT -->
+
+        <section class="content">
+
+
+            <h1>
+                ⚙️ Settings
+            </h1>
+
+
+
+            <div class="panel">
+
+
+                <h3>
+                    Application Settings
+                </h3>
+
+
+
+                <!-- ADMIN NAME -->
+
+                <label>
+                    Admin Name
+                </label>
+
+
+                <input
+                    type="text"
+                    id="adminName"
+                    placeholder="Enter Admin Name">
+
+
+
+                <!-- APPLICATION NAME -->
+
+                <label>
+                    Application Name
+                </label>
+
+
+                <input
+                    type="text"
+                    id="appName"
+                    value="CivicSense">
+
+
+
+                <!-- AI DETECTION -->
+
+                <label>
+                    AI Detection
+                </label>
+
+
+                <select id="aiDetection">
+
+                    <option value="Enabled">
+                        Enabled
+                    </option>
+
+                    <option value="Disabled">
+                        Disabled
+                    </option>
+
+                </select>
+
+
+
+                <!-- LOCATION MODE -->
+
+                <label>
+                    Location Mode
+                </label>
+
+
+                <select id="locationMode">
+
+                    <option value="GPS + Manual Map Selection">
+                        GPS + Manual Map Selection
+                    </option>
+
+                    <option value="Manual Only">
+                        Manual Only
+                    </option>
+
+                </select>
+
+
+
+                <!-- BUTTONS -->
+
+                <div style="
+                    display:flex;
+                    gap:12px;
+                    margin-top:20px;
+                ">
+
+
+                    <!-- SAVE -->
+
+                    <button
+                        type="button"
+                        class="primary"
+                        onclick="saveSettings()">
+
+                        💾 Save Settings
+
+                    </button>
+
+
+
+                    <!-- DASHBOARD -->
+
+                    <button
+                        type="button"
+                        onclick="goDashboard()">
+
+                        🏠 Dashboard
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+
+        /* =====================================
+           LOAD SAVED SETTINGS
+        ===================================== */
+
+        window.onload = function() {
+
+
+            const savedAdmin =
+                localStorage.getItem("adminName");
+
+
+            const savedApp =
+                localStorage.getItem("appName");
+
+
+            const savedAI =
+                localStorage.getItem("aiDetection");
+
+
+            const savedLocation =
+                localStorage.getItem("locationMode");
+
+
+
+            if (savedAdmin) {
+
+                document.getElementById(
+                    "adminName"
+                ).value = savedAdmin;
+
+            }
+
+
+
+            if (savedApp) {
+
+                document.getElementById(
+                    "appName"
+                ).value = savedApp;
+
+            }
+
+
+
+            if (savedAI) {
+
+                document.getElementById(
+                    "aiDetection"
+                ).value = savedAI;
+
+            }
+
+
+
+            if (savedLocation) {
+
+                document.getElementById(
+                    "locationMode"
+                ).value = savedLocation;
+
+            }
+
+
+
+            /* Show saved admin name */
+
+            if (savedAdmin) {
+
+                document.getElementById(
+                    "settingsAdminName"
+                ).innerHTML =
+                    "👤 " + savedAdmin;
+
+            }
+
+        };
+
+
+
+        /* =====================================
+           SAVE SETTINGS
+        ===================================== */
+
+        function saveSettings() {
+
+
+            const adminName =
+                document
+                .getElementById("adminName")
+                .value
+                .trim();
+
+
+            const appName =
+                document
+                .getElementById("appName")
+                .value
+                .trim();
+
+
+            const aiDetection =
+                document
+                .getElementById("aiDetection")
+                .value;
+
+
+            const locationMode =
+                document
+                .getElementById("locationMode")
+                .value;
+
+
+
+            /* Check Admin Name */
+
+            if (adminName === "") {
+
+                alert(
+                    "Please enter Admin Name"
+                );
+
+                return;
+
+            }
+
+
+
+            /* Save */
+
+            localStorage.setItem(
+                "adminName",
+                adminName
+            );
+
+
+            localStorage.setItem(
+                "appName",
+                appName
+            );
+
+
+            localStorage.setItem(
+                "aiDetection",
+                aiDetection
+            );
+
+
+            localStorage.setItem(
+                "locationMode",
+                locationMode
+            );
+
+
+
+            /* Update current page */
+
+            document.getElementById(
+                "settingsAdminName"
+            ).innerHTML =
+                "👤 " + adminName;
+
+
+
+            /* Success */
+
+            alert(
+                "Settings saved successfully! ✅"
+            );
+
+        }
+
+
+
+        /* =====================================
+           GO TO DASHBOARD
+        ===================================== */
+
+        function goDashboard() {
+
+            window.location.href = "/";
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Analytics - CivicSense</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+<div class="logo">🌱 CivicSense</div>
+
+<a href="/" class="menu">🏠 Dashboard</a>
+
+<a href="/complaints" class="menu">📋 Complaints</a>
+
+<a href="/add-complaint" class="menu">➕ Add</a>
+
+<a href="/map" class="menu">🗺️ Map</a>
+
+<a href="/analytics" class="menu active">📊 Analytics</a>
+
+<a href="/reports" class="menu">📄 Reports</a>
+
+<a href="/settings" class="menu">⚙️ Settings</a>
+
+</aside>
+
+
+<main class="main">
+
+<header class="topbar">
+
+<span>🔔</span>
+
+<a href="/admin"
+style="text-decoration:none;color:#333;">
+👤 Admin
+</a>
+
+</header>
+
+
+<section class="content">
+
+<h1>📊 Analytics</h1>
+
+<div class="grid2">
+
+<div class="panel">
+
+<h3>Complaint Categories</h3>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+
+<div class="panel">
+
+<h3>Complaint Summary</h3>
+
+<h2>{{ complaints|length }}</h2>
+
+<p>Total Complaints</p>
+
+<hr>
+
+<p>
+High Priority:
+{{ complaints
+|selectattr("priority","equalto","High")
+|list
+|length }}
+</p>
+
+<p>
+Critical:
+{{ complaints
+|selectattr("priority","equalto","Critical")
+|list
+|length }}
+</p>
+
+<p>
+Resolved:
+{{ complaints
+|selectattr("status","equalto","Resolved")
+|list
+|length }}
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<script>
+
+new Chart(
+document.getElementById("chart"),
+{
+    type: "bar",
+
+    data: {
+
+        labels: [
+            "Garbage",
+            "Road Damage",
+            "Streetlight",
+            "Water",
+            "Drainage"
+        ],
+
+        datasets: [{
+            label: "Complaints",
+
+            data: [
+                {{ complaints
+                |selectattr("category","equalto","Garbage")
+                |list
+                |length }},
+
+                {{ complaints
+                |selectattr("category","equalto","Road Damage")
+                |list
+                |length }},
+
+                {{ complaints
+                |selectattr("category","equalto","Streetlight")
+                |list
+                |length }},
+
+                {{ complaints
+                |selectattr("category","equalto","Water Leakage")
+                |list
+                |length }},
+
+                {{ complaints
+                |selectattr("category","equalto","Drainage")
+                |list
+                |length }}
+            ]
+        }]
+    },
+
+    options: {
+        responsive: true
+    }
+});
+
+</script>
+
+</body>
+</html>
