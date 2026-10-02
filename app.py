@@ -1,27 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
-from datetime import datetime
-import os
-import uuid
-
 app = Flask(__name__)
 
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
-
-MODEL_PATH = "civic_model.pt"
-
-model = None
-
-try:
-    if os.path.exists(MODEL_PATH):
-        model = YOLO(MODEL_PATH)
-        print("AI model loaded successfully.")
-    else:
-        print("WARNING: civic_model.pt not found.")
-except Exception as e:
-    print("Model loading error:", e)
-
-
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  
 # ---------------------------------------------------------
 # DEMO COMPLAINT DATA
 # ---------------------------------------------------------
