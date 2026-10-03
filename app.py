@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
+from datetime import datetime
+import os
+import uuid
 app = Flask(__name__)
 
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  
@@ -275,305 +278,73 @@ def api_complaints():
 
 
 # ---------------------------------------------------------
-# AI IMAGE ANALYSIS
-# ---------------------------------------------------------
-
-@app.route(
-    "/analyze-image",
-    methods=["POST"]
-)
-def analyze_image():
-
-    if "image" not in request.files:
-
-        return jsonify(
-            success=False,
-            message="Please upload an image."
-        ), 400
-
-
-    image = request.files["image"]
-
-
-    if not image.filename:
-
-        return jsonify(
-            success=False,
-            message="Please select an image."
-        ), 400
-
-
-    if not allowed_file(
-        image.filename
-    ):
-
-        return jsonify(
-            success=False,
-            message="Use JPG, JPEG, PNG or WEBP."
-        ), 400
-
-
-    if model is None:
-
-        return jsonify(
-            success=False,
-            message="civic_model.pt was not found or could not be loaded."
-        ), 500
-
-
-    os.makedirs(
-        "uploads",
-        exist_ok=True
-    )
-
-
-    safe_name = (
-        f"{uuid.uuid4().hex}_"
-        f"{secure_filename(image.filename)}"
-    )
-
-
-    path = os.path.join(
-        "uploads",
-        safe_name
-    )
-
-
-    image.save(path)
-
-
-    try:
-
-        results = model(
-            path,
-            conf=0.20,
-            verbose=False
-        )
-
-
-        boxes = results[0].boxes
-
-
-        if boxes is None or len(boxes) == 0:
-
-            return jsonify(
-                success=True,
-                detected=False,
-                message="No civic issue detected."
-            )
-
-
-        best = max(
-            boxes,
-            key=lambda b: float(
-                b.conf[0]
-            )
-        )
-
-
-        class_id = int(
-            best.cls[0]
-        )
-
-
-        confidence = round(
-            float(best.conf[0]) * 100,
-            2
-        )
-
-
-        issue = model_label(
-            class_id
-        )
-
-
-        severity, score = score_for_issue(
-            issue
-        )
-
-
-        return jsonify(
-
-            success=True,
-
-            detected=True,
-
-            issue=issue,
-
-            confidence=confidence,
-
-            severity=severity,
-
-            priority_score=score
-
-        )
-
-
-    except Exception as e:
-
-        return jsonify(
-            success=False,
-            message=f"AI analysis failed: {e}"
-        ), 500
-
-
-    finally:
-
-        try:
-
-            os.remove(path)
-
-        except OSError:
-
-            pass
-
-
-# ---------------------------------------------------------
 # SUBMIT COMPLAINT
 # ---------------------------------------------------------
 
-@app.route(
-    "/submit-complaint",
-    methods=["POST"]
-)
+@app.route("/submit-complaint", methods=["POST"])
 def submit_complaint():
 
-    data = request.get_json(
-        silent=True
-    ) or {}
+    try:
+        data = request.get_json(silent=True) or {}
 
+        category = data.get("category") or "Civic Issue"
+        description = data.get("description") or ""
+        location = data.get("location") or "Location not provided"
 
-    ai = data.get(
-        "ai_analysis"
-    ) or {}
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
 
+        ai = data.get("ai_analysis") or {}
 
-    category = (
-        data.get("category")
-        or ai.get("issue")
-        or "Civic Issue"
-    )
+        issue = ai.get("issue") or category
 
+        try:
+            confidence = float(ai.get("confidence") or 0)
+        except:
+            confidence = 0
 
-    issue = (
-        ai.get("issue")
-        or category
-    )
+        severity = ai.get("severity") or "MEDIUM"
 
+        try:
+            score = int(float(ai.get("priority_score") or 50))
+        except:
+            score = 50
 
-    description = data.get(
-        "description",
-        ""
-    )
+        priority = priority_from_score(score)
 
+        complaint = {
+            "id": f"CS-{10000 + len(complaints) + 1}",
+            "title": issue,
+            "category": category,
+            "description": description,
+            "location": location,
+            "latitude": latitude,
+            "longitude": longitude,
+            "priority": priority,
+            "status": "Submitted",
+            "ai_confidence": confidence,
+            "severity": severity,
+            "priority_score": score,
+            "time": datetime.now().strftime("%d %b %Y, %I:%M %p")
+        }
 
-    location = data.get(
-        "location",
-        "Location not provided"
-    )
+        complaints.insert(0, complaint)
 
+        return jsonify({
+            "success": True,
+            "message": "Complaint submitted successfully.",
+            "complaint": complaint
+        })
 
-    latitude = data.get(
-        "latitude"
-    )
+    except Exception as e:
 
+        print("SUBMIT COMPLAINT ERROR:", repr(e))
 
-    longitude = data.get(
-        "longitude"
-    )
-
-
-    confidence = float(
-        ai.get("confidence") or 0
-    )
-
-
-    severity = (
-        ai.get("severity")
-        or "MEDIUM"
-    )
-
-
-    score = int(
-        float(
-            ai.get(
-                "priority_score"
-            )
-            or 50
-        )
-    )
-
-
-    priority = priority_from_score(
-        score
-    )
-
-
-    complaint = {
-
-        "id":
-            f"CS-{10000 + len(complaints) + 1}",
-
-        "title":
-            issue,
-
-        "category":
-            category,
-
-        "description":
-            description,
-
-        "location":
-            location,
-
-        "latitude":
-            latitude,
-
-        "longitude":
-            longitude,
-
-        "priority":
-            priority,
-
-        "status":
-            "Submitted",
-
-        "ai_confidence":
-            confidence,
-
-        "severity":
-            severity,
-
-        "priority_score":
-            score,
-
-        "time":
-            datetime.now().strftime(
-                "%d %b %Y, %I:%M %p"
-            )
-
-    }
-
-
-    complaints.insert(
-        0,
-        complaint
-    )
-
-
-    return jsonify(
-
-        success=True,
-
-        message=
-            "Complaint submitted successfully.",
-
-        complaint=
-            complaint
-
-    )
-
-
+        return jsonify({
+            "success": False,
+            "message": "Complaint submission failed.",
+            "error": str(e)
+        }), 500
 # ---------------------------------------------------------
 # UPDATE STATUS
 # ---------------------------------------------------------

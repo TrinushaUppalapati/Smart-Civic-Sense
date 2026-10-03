@@ -121,7 +121,8 @@ style="display:none">
 
 
 <button
-id="analyze">
+id="analyze"
+style="display:none;">
 
   Analyze Image
 
@@ -761,94 +762,70 @@ aiAnalysis
 };
 
 
+
 try {
 
+    const response = await fetch(
+        "/submit-complaint",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        }
+    );
 
-const response =
-await fetch(
+    const text = await response.text();
 
-"/submit-complaint",
+    let data;
 
-{
+    try {
+        data = JSON.parse(text);
+    } catch {
+        console.error("Server response:", text);
+        alert("Server error. Please check Vercel logs.");
+        return;
+    }
 
-method:
-"POST",
+    if (!response.ok || !data.success) {
 
-headers:
-{
+        console.error("Submission error:", data);
 
-"Content-Type":
-"application/json"
+        alert(
+            data.error ||
+            data.message ||
+            "Complaint submission failed."
+        );
 
-},
+        return;
+    }
 
-body:
-JSON.stringify(
-payload
-)
+    document.getElementById("message").innerHTML = `
+        <div class="success">
 
-}
+            ✅ Complaint submitted successfully!
 
-);
+            <br>
 
+            Complaint ID:
+            <b>${data.complaint.id}</b>
 
-const data =
-await response.json();
+        </div>
+    `;
 
+    setTimeout(function() {
 
-if (!data.success) {
+        window.location.href = "/";
 
-alert(
-data.message
-);
-
-return;
-
-}
-
-
-document
-.getElementById(
-"message"
-)
-.innerHTML =
-
-`<div class="success">
-
-✅ Complaint submitted successfully!
-
-<br>
-
-Complaint ID:
-
-<b>
-${data.complaint.id}
-</b>
-
-</div>`;
-
-
-setTimeout(
-
-function() {
-
-window.location.href =
-"/";
-
-},
-
-1500
-
-);
-
+    }, 1500);
 
 }
-
 catch(error) {
 
-alert(
-"Submission failed."
-);
+    console.error("Submission error:", error);
+
+    alert("Submission failed. Please try again.");
 
 }
 
